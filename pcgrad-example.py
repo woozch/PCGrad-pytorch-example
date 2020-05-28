@@ -47,10 +47,10 @@ def PCGrad_backward(net, optimizer, X, y, loss_layer=nn.CrossEntropyLoss()):
                   for group in optimizer.param_groups for p in group['params']]
     num_tasks = len(y)  # T
     losses = []
-
+    optimizer.zero_grad()
+    
     # calculate gradients for each task
     for i in range(num_tasks):
-        optimizer.zero_grad()
         result = net(X)
         loss = loss_layer(result[i], y[i])
         losses.append(loss)
@@ -65,7 +65,8 @@ def PCGrad_backward(net, optimizer, X, y, loss_layer=nn.CrossEntropyLoss()):
         # fill zero grad if grad is None but requires_grad is true
         grads_task.append(torch.cat([g if g is not None else torch.zeros(
             grad_numel[i], device=devices[i]) for i, g in enumerate(grad)]))
-
+        optimizer.zero_grad()
+        
     # shuffle gradient order
     random.shuffle(grads_task)
 
